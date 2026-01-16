@@ -1,0 +1,326 @@
+"""
+TEST SCENARIOS AND EXPECTED BEHAVIORS
+======================================
+
+This document describes test scenarios to validate the RAG system.
+
+SCENARIO 1: Basic Question Answering
+-------------------------------------
+
+Setup: Load any PDF document
+
+Test Case 1.1: Factual Question
+Input: "What is the main topic of this document?"
+Expected:
+- Retrieves relevant chunks
+- Provides answer based on document content
+- Includes citations [p1:c1] etc.
+- Quotes evidence from chunks
+
+Test Case 1.2: Specific Detail
+Input: "What was the revenue in Q4?"
+Expected:
+- If found: Answer with specific number + citation
+- If not found: "Not found in the document."
+- Debug shows relevant chunks retrieved
+
+Test Case 1.3: Question with No Answer
+Input: "What is the population of Mars?"
+Expected:
+- Returns: "Not found in the document."
+- Debug shows low relevance scores
+- No hallucinated answer
+
+SCENARIO 2: Multi-Turn Conversations
+-------------------------------------
+
+Test Case 2.1: Follow-up with Pronoun
+Turn 1: "Who is the CEO?"
+Expected: Answer with name + citation
+
+Turn 2: "What is their background?"
+Expected:
+- Query rewritten to "What is the CEO's background?"
+- Retrieves relevant chunks about CEO
+- Provides answer based on document
+
+Test Case 2.2: Contextual Follow-up
+Turn 1: "What were the Q4 results?"
+Expected: Answer with Q4 information
+
+Turn 2: "How does that compare to Q3?"
+Expected:
+- Understands "that" refers to Q4 results
+- Retrieves Q3 and Q4 information
+- Provides comparison if both found
+
+Test Case 2.3: Unrelated Follow-up
+Turn 1: "What is the revenue?"
+Turn 2: "What are the main products?"
+Expected:
+- Second question treated as standalone
+- No confusion from first question context
+
+SCENARIO 3: Citation Accuracy
+------------------------------
+
+Test Case 3.1: Single Source
+Input: "What is mentioned on page 5?"
+Expected:
+- Answer includes [p5:cX] citation
+- Evidence quotes from page 5
+
+Test Case 3.2: Multiple Sources
+Input: "What are all the revenue figures mentioned?"
+Expected:
+- Multiple citations [p3:c10], [p7:c25], etc.
+- Evidence from each cited chunk
+
+Test Case 3.3: Citation Verification
+Input: Any question
+Validation:
+- Citations match retrieved chunks
+- Page numbers accurate
+- Chunk IDs correspond to actual chunks
+
+SCENARIO 4: Retrieval Quality
+------------------------------
+
+Test Case 4.1: Exact Match
+Input: Copy exact sentence from document
+Expected:
+- High similarity score (>0.8)
+- Retrieved chunk contains the sentence
+
+Test Case 4.2: Paraphrased Question
+Input: Rephrase content from document
+Expected:
+- Moderate-high similarity score (>0.6)
+- Retrieves semantically similar chunks
+
+Test Case 4.3: Top-K Variation
+Test with different --top-k values (1, 3, 5, 10)
+Expected:
+- More chunks = more context
+- Answers may be more comprehensive
+- Performance trade-off
+
+SCENARIO 5: Document Types
+---------------------------
+
+Test Case 5.1: Technical Report
+Expected: Handles technical terminology correctly
+
+Test Case 5.2: Financial Document
+Expected: Preserves numerical accuracy
+
+Test Case 5.3: Legal Contract
+Expected: Maintains precise language
+
+Test Case 5.4: Meeting Minutes
+Expected: Tracks different speakers/topics
+
+SCENARIO 6: Edge Cases
+----------------------
+
+Test Case 6.1: Very Long Document (>100 pages)
+Expected:
+- Completes ingestion
+- Index builds successfully
+- Retrieval still fast
+
+Test Case 6.2: Very Short Document (1 page)
+Expected:
+- Works with few chunks
+- Still provides citations
+
+Test Case 6.3: Document with Tables
+Expected:
+- Extracts table text
+- May lose table structure
+- Still retrieves information
+
+Test Case 6.4: Document with Special Characters
+Expected:
+- Handles Unicode correctly
+- Preserves formatting where possible
+
+SCENARIO 7: Error Handling
+--------------------------
+
+Test Case 7.1: Missing API Key
+Command: python main.py doc.pdf
+(with no GEMINI_API_KEY set)
+Expected:
+- Clear error message
+- Instructions to set API key
+- No crash
+
+Test Case 7.2: Invalid PDF Path
+Command: python main.py nonexistent.pdf
+Expected:
+- "PDF file not found" error
+- Graceful exit
+
+Test Case 7.3: Non-PDF File
+Command: python main.py document.txt
+Expected:
+- "File must be a PDF" error
+- No attempt to process
+
+Test Case 7.4: Empty PDF
+Input: PDF with no extractable text
+Expected:
+- "No text extracted" error
+- Suggestion to check PDF type
+
+SCENARIO 8: Performance Tests
+------------------------------
+
+Test Case 8.1: First Run Timing
+Measure: Time from start to chat prompt
+Expected: 30-60 seconds for typical document
+
+Test Case 8.2: Cached Run Timing
+Use: --use-cache flag
+Expected: <5 seconds to start
+
+Test Case 8.3: Response Time
+Measure: Time to get answer
+Expected: 2-5 seconds per question
+
+Test Case 8.4: Memory Usage
+Monitor: RAM during operation
+Expected: ~500-1000MB
+
+SCENARIO 9: Debug Mode
+----------------------
+
+Test Case 9.1: With Debug (default)
+Expected Output:
+```
+[RETRIEVAL DEBUG]
+Rank 1: Score: 0.8234 | Page: 13 | Chunk ID: 42
+Text: "..."
+```
+
+Test Case 9.2: Without Debug (--no-debug)
+Expected Output:
+- No retrieval debug information
+- Only questions and answers
+
+SCENARIO 10: Model Comparison
+------------------------------
+
+Test Case 10.1: gemini-1.5-flash (default)
+Expected:
+- Fast responses
+- Good quality
+- Cost-effective
+
+Test Case 10.2: gemini-1.5-pro
+Command: --model gemini-1.5-pro
+Expected:
+- Higher quality answers
+- Better reasoning
+- More accurate citations
+- Slightly slower
+
+VALIDATION CHECKLIST
+--------------------
+
+For each test run, verify:
+☐ PDF ingestion completes without errors
+☐ All pages processed
+☐ Chunks created with metadata
+☐ Index builds successfully
+☐ Retrieval returns relevant chunks
+☐ Answers include citations
+☐ Citations are accurate
+☐ Evidence sections present
+☐ "Not found" when appropriate
+☐ No hallucinations
+☐ Follow-up questions work
+☐ Debug output (if enabled) is clear
+
+REGRESSION TESTS
+----------------
+
+Run these tests before any major changes:
+1. Basic Q&A on sample document
+2. Multi-turn conversation
+3. Question with no answer
+4. Cache functionality
+5. Different models
+6. Error cases (missing file, no API key)
+
+MANUAL TESTING WORKFLOW
+------------------------
+
+1. Choose test document
+2. Run: python main.py document.pdf
+3. Ask test questions from scenarios above
+4. Verify expected behaviors
+5. Check citations manually
+6. Test follow-up questions
+7. Try edge cases
+8. Verify error handling
+
+AUTOMATED TESTING (Future)
+--------------------------
+
+Could implement:
+- Unit tests for each module
+- Integration tests for pipeline
+- Golden dataset for evaluation
+- Automated citation checking
+- Performance benchmarks
+- Regression test suite
+
+KNOWN LIMITATIONS TO TEST
+--------------------------
+
+1. PDF Extraction
+   - Scanned PDFs fail (no OCR)
+   - Complex tables may be garbled
+   - Images ignored
+
+2. Chunking
+   - Splits may occur mid-sentence
+   - Context may be lost across chunks
+
+3. Retrieval
+   - Synonyms may be missed
+   - Very specific queries may fail
+
+4. Generation
+   - Model may occasionally deviate from format
+   - Very complex reasoning may fail
+   - Citation format compliance varies
+
+SUCCESS CRITERIA
+----------------
+
+System passes if:
+✓ Answers factual questions correctly
+✓ Includes accurate citations
+✓ Returns "Not found" when appropriate
+✓ Handles follow-up questions
+✓ No hallucinations detected
+✓ Performance acceptable (<5s per question)
+✓ Error handling works gracefully
+✓ Works with different document types
+
+FAILURE CASES
+-------------
+
+System fails if:
+✗ Hallucinations facts not in document
+✗ Citations incorrect or missing
+✗ Crashes on valid inputs
+✗ Answers unrelated to document
+✗ Ignores "not found" rule
+✗ Performance degraded (>30s per question)
+
+For actual testing, use a variety of PDF documents and
+systematically work through these scenarios.

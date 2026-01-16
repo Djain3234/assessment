@@ -1,0 +1,22 @@
+================================================================================
+                    HOW TO RUN AND TEST THE SYSTEM
+================================================================================
+
+INSTALLATION
+============
+
+1. cd rag_pdf_agent
+2. pip install -r requirements.txt
+3. $env:GEMINI_API_KEY='your-api-key'
+
+RUN
+===
+
+python main.py ./document.pdf
+
+VALIDATE
+========
+
+python validate.py ./document.pdf
+
+That's it! The system handles everything automatically.

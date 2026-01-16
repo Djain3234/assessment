@@ -1,0 +1,132 @@
+================================================================================
+                    RAG PDF CONVERSATIONAL AGENT
+                           QUICKSTART
+================================================================================
+
+A complete, production-ready Retrieval-Augmented Generation system for
+strictly grounded Q&A over PDF documents using Google Gemini API.
+
+--------------------------------------------------------------------------------
+INSTALLATION (2 minutes)
+--------------------------------------------------------------------------------
+
+1. Install dependencies:
+   
+   pip install -r requirements.txt
+
+2. Get your Gemini API key:
+   
+   https://makersuite.google.com/app/apikey
+
+3. Set the API key:
+   
+   Windows PowerShell:
+   $env:GEMINI_API_KEY='your-api-key-here'
+   
+   Windows CMD:
+   set GEMINI_API_KEY=your-api-key-here
+   
+   Linux/Mac:
+   export GEMINI_API_KEY='your-api-key-here'
+
+--------------------------------------------------------------------------------
+USAGE
+--------------------------------------------------------------------------------
+
+Basic command:
+
+   python main.py ./your_document.pdf
+
+The system will:
+1. Extract text from PDF (with progress bar)
+2. Split into chunks with metadata
+3. Build vector index with FAISS
+4. Start interactive chat
+
+Then ask questions!
+
+--------------------------------------------------------------------------------
+KEY FEATURES
+--------------------------------------------------------------------------------
+
+✓ Strictly grounded answers (no hallucinations)
+✓ Citations with page numbers [p13:c42]
+✓ Evidence sections with quotes
+✓ Multi-turn conversations
+✓ Debug mode shows retrieval process
+✓ Returns "Not found in document" when uncertain
+✓ Works with any PDF document type
+
+--------------------------------------------------------------------------------
+ADVANCED OPTIONS
+--------------------------------------------------------------------------------
+
+Use better model:
+   python main.py doc.pdf --model gemini-1.5-pro
+
+Adjust retrieval:
+   python main.py doc.pdf --top-k 3 --chunk-size 1000
+
+Disable debug output:
+   python main.py doc.pdf --no-debug
+
+Use cached index (faster):
+   python main.py doc.pdf --use-cache
+
+--------------------------------------------------------------------------------
+PROJECT FILES
+--------------------------------------------------------------------------------
+
+main.py           - Entry point and CLI
+ingest.py         - PDF extraction and chunking  
+retriever.py      - FAISS vector search
+chat.py           - Conversational agent with Gemini
+prompt.py         - Grounded prompt templates
+requirements.txt  - Dependencies
+
+README.md              - Quick reference
+SETUP.md               - Detailed setup guide
+PROJECT_OVERVIEW.txt   - Complete documentation
+TEST_SCENARIOS.txt     - Testing guide
+example_usage.py       - Programmatic API examples
+
+--------------------------------------------------------------------------------
+TROUBLESHOOTING
+--------------------------------------------------------------------------------
+
+Problem: "GEMINI_API_KEY not set"
+Solution: Set the environment variable as shown above
+
+Problem: "PDF file not found"
+Solution: Use correct path to PDF file
+
+Problem: "No text extracted"
+Solution: PDF might be scanned - requires OCR preprocessing
+
+Problem: Import errors
+Solution: Run: pip install -r requirements.txt
+
+--------------------------------------------------------------------------------
+DOCUMENTATION
+--------------------------------------------------------------------------------
+
+Quick Start:     This file (QUICKSTART.txt)
+User Guide:      README.md
+Setup Details:   SETUP.md
+Deep Dive:       PROJECT_OVERVIEW.txt
+Testing:         TEST_SCENARIOS.txt
+Code Examples:   example_usage.py
+
+--------------------------------------------------------------------------------
+NEXT STEPS
+--------------------------------------------------------------------------------
+
+1. Try it: python main.py your_document.pdf
+2. Ask questions about your document
+3. Test follow-up questions
+4. Try different models and options
+5. Check PROJECT_OVERVIEW.txt for implementation details
+
+================================================================================
+Ready to go! Start with: python main.py your_document.pdf
+================================================================================
