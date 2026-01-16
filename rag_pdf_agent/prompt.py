@@ -80,7 +80,7 @@ If the answer is not explicitly in the chunks, respond with EXACTLY:
 
 If you can answer:
 1. Provide a clear, concise answer
-2. Include citations using [p{page}:c{chunk_id}] format
+2. Include citations using [pX:cY] format (where X is page number and Y is chunk ID)
 3. Include an "Evidence" section with relevant quotes
 
 Your response:"""
