@@ -49,6 +49,14 @@ class RAGChatAgent:
                 generation_config = genai.types.GenerationConfig(
                     temperature=0.1,  # Very low temperature for strict grounding
                 )
+                # Use correct model name format for Gemini API
+                if "flash" in model_name.lower():
+                    model_name = "gemini-1.5-flash-latest"
+                elif "pro" in model_name.lower():
+                    model_name = "gemini-1.5-pro-latest"
+                else:
+                    model_name = "gemini-1.5-flash-latest"
+                    
                 self.model = genai.GenerativeModel(
                     model_name=model_name,
                     generation_config=generation_config
