@@ -151,13 +151,13 @@ class RAGChatAgent:
         
         return answer
     
-    def _generate_fallback_response(self, query: str, chunks: List[dict]) -> str:
+    def _generate_fallback_response(self, query: str, chunks: List[Tuple]) -> str:
         """
         Generate a simple response using only retrieved chunks (no LLM).
         
         Args:
             query: User's question
-            chunks: Retrieved document chunks
+            chunks: Retrieved document chunks as list of (PDFChunk, score) tuples
             
         Returns:
             Response with retrieved content
@@ -168,10 +168,10 @@ class RAGChatAgent:
         response = "[FALLBACK MODE - Retrieval Only]\n\n"
         response += f"Found {len(chunks)} relevant passages:\n\n"
         
-        for i, chunk in enumerate(chunks, 1):
-            response += f"--- Passage {i} (Page {chunk['page']}, Similarity: {chunk['score']:.3f}) ---\n"
-            response += chunk['text'][:500]  # Show first 500 chars
-            if len(chunk['text']) > 500:
+        for i, (chunk, score) in enumerate(chunks, 1):
+            response += f"--- Passage {i} (Page {chunk.page_number}, Similarity: {score:.3f}) ---\n"
+            response += chunk.text[:500]  # Show first 500 chars
+            if len(chunk.text) > 500:
                 response += "...\n"
             else:
                 response += "\n"
